@@ -47,17 +47,6 @@ python scripts/train.py --config configs/dualcast_default.yaml
 ```shell
 python scripts/test.py --checkpoint path/to/your/best_model.pth
 ```
-# 📖 Citation:
-If you find this project useful for your research, please cite our paper:
-```shell
-@article{zheng2026two,
-  title={A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting},
-  author={Zheng Hui and Li Jiaxin and He Shuping and Wang Yuanda and Xu Tong and Zhang Xinming and Qiu Xuexing and Gao Zhi},
-  journal={IEEE Transactions on Geoscience and Remote Sensing}, 
-  year={2026}
-}
-```
-
 # 🙌🏻 Acknowledgement:
 1. We acknowledge the wonderful work of Mamba and Diffusion Models.
 2. The implementation of TDM is inspired by the Brownian Bridge diffusion process.
