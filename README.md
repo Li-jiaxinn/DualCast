@@ -39,7 +39,7 @@ We provide training and testing scripts in the scripts/ folder.
 
 ### Training
 ```shell
-python scripts/train.py --config configs/dualcast_default.yaml、
+python scripts/train.py --config configs/dualcast_default.yaml
 ```
 ### Testing
 ```shell
