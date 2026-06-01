@@ -2,13 +2,11 @@
 [DualCast.pdf](https://github.com/user-attachments/files/28453600/DualCast.pdf)
 
 # 📕 Introduction:
-
 In this work, we propose **DualCast**, a two-stage multi-modal learning framework for precipitation nowcasting. DualCast addresses the challenges of cross-modal dependency, spatial displacement, and low efficiency through two core designs: 
 1.  **Progressive Fusion Model (PFM):** A deterministic stage that utilizes Wavelet Down Blocks and Mamba-based modules (HA-Mamba/DC-Mamba) to capture consistency and complementarity from Radar and Satellite data.
 2.  **Truncated Diffusion Model (TDM):** A probabilistic stage based on Brownian Bridge mechanism. It leverages the PFM output as a structural prior, significantly improving inference speed and detail fidelity compared to standard diffusion models.
 
 # 📖 Usage:
-
 1.Clone Repository
 ```shell
 git clone https://github.com/Li-jiaxinn/DualCast
@@ -48,7 +46,6 @@ Testing
 python scripts/test.py --checkpoint path/to/your/best_model.pth
 ```
 # 📖 Citation:
-
 If you find this project useful for your research, please cite our paper:
 bibtex
 @article{zheng2026two,
@@ -58,8 +55,7 @@ bibtex
   year={2026}
 }
 
-🙌🏻 Acknowledgement:
-
+# 🙌🏻 Acknowledgement:
 We acknowledge the wonderful work of Mamba and Diffusion Models.
 The implementation of TDM is inspired by the Brownian Bridge diffusion process.
 The training pipeline is adapted from standard PyTorch practices.
