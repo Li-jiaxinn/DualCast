@@ -561,16 +561,16 @@ class PFM:
     2. 拼接: [r_out, s_out] 沿C维度
     3. DCMamba: 融合特征时空编码
     """
-    def __init__(self, T=13, H=12, W=12):
-        self.T = T
-        self.H = H
-        self.W = W
+    def __init__(self, H_in, W_in, T_in):
+        self.T = T_in
+        self.H = H_in
+        self.W = W_in
 
         # 多模态编码 (通道: 雷达1→128, 卫星3→128)
-        self.ha_mamba = HAMamba(128, [256, 64], num_layers=8, T=T, H=H, W=W)
+        self.ha_mamba = HAMamba(128, [256, 64], num_layers=8, T=T_in, H=H_in, W=W_in)
 
         # 单模态编码
-        self.dc_mamba = DCMamba(128, [128], num_layers=8, T=T, H=H, W=W)
+        self.dc_mamba = DCMamba(128, [128], num_layers=8, T=T_in, H=H_in, W=W_in)
 
     def forward(self, r_x, s_x):
         """
@@ -584,3 +584,4 @@ class PFM:
         x = concat([r_out, s_out], dim=2)
         x = self.dc_mamba(x)
         return x
+
