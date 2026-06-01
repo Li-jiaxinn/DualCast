@@ -1,4 +1,4 @@
-# DualCast: A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting
+# A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting
 
 # 📕 Introduction:
 In this work, we propose **DualCast**, a two-stage multi-modal learning framework for precipitation nowcasting. DualCast addresses the challenges of cross-modal dependency, spatial displacement, and low efficiency through two core designs: 
