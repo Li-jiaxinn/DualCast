@@ -1,7 +1,5 @@
 # DualCast: A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting
 
-![DualCast Framework Architecture](https://raw.githubusercontent.com/Li-jiaxinn/DualCast/main/dualcast.png)
-
 # 📕 Introduction:
 In this work, we propose **DualCast**, a two-stage multi-modal learning framework for precipitation nowcasting. DualCast addresses the challenges of cross-modal dependency, spatial displacement, and low efficiency through two core designs: 
 1. Progressive Fusion Model (PFM): A deterministic stage that utilizes HA-Mamba and DC-Mamba to capture consistency and complementarity from Radar and Satellite data.
