@@ -1,6 +1,3 @@
-# DualCast：
-
-Official PyTorch code for training and inference pipeline for  
 **DualCast: A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting**
 [DualCast.pdf](https://github.com/user-attachments/files/28453600/DualCast.pdf)
 
@@ -12,7 +9,7 @@ In this work, we propose **DualCast**, a two-stage multi-modal learning framewor
 
 📖 Usage:
 
-1. Clone Repository
+1.Clone Repository
 ```shell
 git clone https://github.com/Li-jiaxinn/DualCast
 ```
