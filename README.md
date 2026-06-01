@@ -37,11 +37,11 @@ We use the SEVIR-LR dataset for training and evaluation.
 ## 4. Training and Testing
 We provide training and testing scripts in the scripts/ folder.
 
-Training
+### Training
 ```shell
 python scripts/train.py --config configs/dualcast_default.yaml、
 ```
-Testing
+### Testing
 ```shell
 python scripts/test.py --checkpoint path/to/your/best_model.pth
 ```
