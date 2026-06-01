@@ -3,8 +3,8 @@
 
 # 📕 Introduction:
 In this work, we propose **DualCast**, a two-stage multi-modal learning framework for precipitation nowcasting. DualCast addresses the challenges of cross-modal dependency, spatial displacement, and low efficiency through two core designs: 
-1. Progressive Fusion Model (PFM): A deterministic stage that utilizes Wavelet Down Blocks and PFM (HA-Mamba and DC-Mamba) to capture consistency and complementarity from Radar and Satellite data.
-2. Truncated Diffusion Model (TDM): A probabilistic stage based on Brownian Bridge mechanism. It leverages the PFM output as a structural prior, significantly improving inference speed and detail fidelity compared to standard diffusion models.
+1. Progressive Fusion Model (PFM): A deterministic stage that utilizes Wavelet Down Block and PFM (HA-Mamba and DC-Mamba) to capture consistency and complementarity from Radar and Satellite data.
+2. Truncated Diffusion Model (TDM): A probabilistic stage based on Brownian Bridge mechanism. It leverages the PFM outputs as structural prior, significantly improving inference speed and detail fidelity compared to standard diffusion models.
 
 # 📖 Usage:
 ## 1. Clone Repository
