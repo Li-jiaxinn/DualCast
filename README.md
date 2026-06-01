@@ -34,7 +34,11 @@ pip install -r requirements.txt
 ```
 
 ## 3. Prepare Datasets
-We use the SEVIR-LR dataset for training and evaluation.
+We use the SEVIR-LR dataset for training and evaluation. If you already have the original SEVIR dataset, you may want to get SEVIR-LR by downsampling the original SEVIR. In this case run:
+```shell
+cd DualCast
+ln -s path_to_SEVIR ./datasets/sevir  # link to your SEVIR dataset.
+python ./scripts/datasets/sevir/downsample_sevir.py
 
 ## 4. Training and Testing
 We provide training and testing scripts in the ./scripts folder.
