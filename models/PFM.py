@@ -1,21 +1,4 @@
 # ============================================================================
-# 工具函数
-# ============================================================================
-
-def LayerNorm(x):
-    mean = mean(x, axis=-1, keepdims=True)
-    std = std(x, axis=-1, keepdims=True)
-    return (x - mean) / (std + eps)
-
-def Dropout(x, rate):
-    mask = random_mask(x.shape, p=rate)
-    return x * mask
-
-def SiLU(x):
-    return x * sigmoid(x)
-
-
-# ============================================================================
 # 核心运算: Selective Scan (SSM)
 # ============================================================================
 
@@ -32,12 +15,6 @@ def selective_scan(x, dt, dA, dB, C, D, z):
         outputs.append(y * sigmoid(z[:,:,t]))
 
     return stack(outputs, dim=-1)
-
-
-def causal_conv(x, conv):
-    """因果卷积"""
-    return conv(x)[:,:,:x.shape[-1]]
-
 
 # ============================================================================
 # 4方向扫描Mamba (单输入)
@@ -103,7 +80,7 @@ class BiMamba4D:
     def forward(self, x_2d):
         """
         Args:
-            x_2d: [B, H, W, C] - 2D空间网格
+            x_2d: [B, H, W, C]
         Returns:
             out: [B, H, W, C]
         """
@@ -152,9 +129,9 @@ class MMBiMamba4D:
         self.dt_rank = ceil(d_model / 16)
         self.d_state = d_state
 
-        # 4方向 × 2模态 (雷达用'a'前缀, 卫星用'v'前缀)
+        # 4方向 × 2模态 (雷达用'r'前缀, 卫星用's'前缀)
         for direction in ['LR', 'RL', 'TB', 'BT']:
-            for mod in ['a', 'v']:
+            for mod in ['r', 's']:
                 p = f'{direction}_{mod}'
                 setattr(self, f'{p}_in_proj', Linear(d_model, self.d_inner * 2))
                 setattr(self, f'{p}_conv1d', Conv1d(self.d_inner, self.d_inner, d_conv, groups=self.d_inner))
@@ -169,52 +146,52 @@ class MMBiMamba4D:
         对雷达和卫星分别做1D双向扫描
         """
         # ============ 雷达 - 前向 (fwd_dir权重) ============
-        r_xz_fwd = getattr(self, f'{fwd_dir}_a_in_proj')(r_x)
+        r_xz_fwd = getattr(self, f'{fwd_dir}_r_in_proj')(r_x)
         r_x_fwd, r_z_fwd = split(r_xz_fwd, 2, dim=1)
-        r_x_conv = causal_conv(r_x_fwd, getattr(self, f'{fwd_dir}_a_conv1d'))
-        r_dt, r_B_f, r_C_f = split(getattr(self, f'{fwd_dir}_a_x_proj')(r_x_conv),
+        r_x_conv = causal_conv(r_x_fwd, getattr(self, f'{fwd_dir}_r_conv1d'))
+        r_dt, r_B_f, r_C_f = split(getattr(self, f'{fwd_dir}_r_x_proj')(r_x_conv),
                                    [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        r_dt = softplus(getattr(self, f'{fwd_dir}_a_dt_proj')(r_dt))
-        r_A = exp(-exp(getattr(self, f'{fwd_dir}_a_A')))
+        r_dt = softplus(getattr(self, f'{fwd_dir}_r_dt_proj')(r_dt))
+        r_A = exp(-exp(getattr(self, f'{fwd_dir}_r_A')))
         r_y_fwd = selective_scan(r_x_conv, r_dt, exp(r_dt*r_A), r_dt*r_B_f, r_C_f,
-                                 getattr(self, f'{fwd_dir}_a_D'), r_z_fwd)
+                                 getattr(self, f'{fwd_dir}_r_D'), r_z_fwd)
 
         # ============ 雷达 - 后向 (bwd_dir权重) ============
         r_x_b = flip(r_x, dim=-1)
-        r_xz_bwd = getattr(self, f'{bwd_dir}_a_in_proj')(r_x_b)
+        r_xz_bwd = getattr(self, f'{bwd_dir}_r_in_proj')(r_x_b)
         r_x_b_1d, r_z_bwd = split(r_xz_bwd, 2, dim=1)
-        r_x_b_conv = causal_conv(r_x_b_1d, getattr(self, f'{bwd_dir}_a_conv1d'))
-        r_dt_b, r_B_b, r_C_b = split(getattr(self, f'{bwd_dir}_a_x_proj')(r_x_b_conv),
+        r_x_b_conv = causal_conv(r_x_b_1d, getattr(self, f'{bwd_dir}_r_conv1d'))
+        r_dt_b, r_B_b, r_C_b = split(getattr(self, f'{bwd_dir}_r_x_proj')(r_x_b_conv),
                                      [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        r_dt_b = softplus(getattr(self, f'{bwd_dir}_a_dt_proj')(r_dt_b))
-        r_A_b = exp(-exp(getattr(self, f'{bwd_dir}_a_A')))
+        r_dt_b = softplus(getattr(self, f'{bwd_dir}_r_dt_proj')(r_dt_b))
+        r_A_b = exp(-exp(getattr(self, f'{bwd_dir}_r_A')))
         r_y_bwd = flip(selective_scan(r_x_b_conv, r_dt_b, exp(r_dt_b*r_A_b), r_dt_b*r_B_b, r_C_b,
-                                     getattr(self, f'{bwd_dir}_a_D'), r_z_bwd), dim=-1)
-        out_r = getattr(self, f'{fwd_dir}_a_out_proj')((r_y_fwd + r_y_bwd) / 2)
+                                     getattr(self, f'{bwd_dir}_r_D'), r_z_bwd), dim=-1)
+        out_r = getattr(self, f'{fwd_dir}_r_out_proj')((r_y_fwd + r_y_bwd) / 2)
 
         # ============ 卫星 - 前向 (fwd_dir权重) ============
-        s_xz_fwd = getattr(self, f'{fwd_dir}_v_in_proj')(s_x)
+        s_xz_fwd = getattr(self, f'{fwd_dir}_s_in_proj')(s_x)
         s_x_fwd, s_z_fwd = split(s_xz_fwd, 2, dim=1)
-        s_x_conv = causal_conv(s_x_fwd, getattr(self, f'{fwd_dir}_v_conv1d'))
-        s_dt, s_B_f, s_C_f = split(getattr(self, f'{fwd_dir}_v_x_proj')(s_x_conv),
+        s_x_conv = causal_conv(s_x_fwd, getattr(self, f'{fwd_dir}_s_conv1d'))
+        s_dt, s_B_f, s_C_f = split(getattr(self, f'{fwd_dir}_s_x_proj')(s_x_conv),
                                    [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        s_dt = softplus(getattr(self, f'{fwd_dir}_v_dt_proj')(s_dt))
-        s_A = exp(-exp(getattr(self, f'{fwd_dir}_v_A')))
+        s_dt = softplus(getattr(self, f'{fwd_dir}_s_dt_proj')(s_dt))
+        s_A = exp(-exp(getattr(self, f'{fwd_dir}_s_A')))
         s_y_fwd = selective_scan(s_x_conv, s_dt, exp(s_dt*s_A), s_dt*s_B_f, s_C_f,
-                                 getattr(self, f'{fwd_dir}_v_D'), s_z_fwd)
+                                 getattr(self, f'{fwd_dir}_s_D'), s_z_fwd)
 
         # ============ 卫星 - 后向 (bwd_dir权重) ============
         s_x_b = flip(s_x, dim=-1)
-        s_xz_bwd = getattr(self, f'{bwd_dir}_v_in_proj')(s_x_b)
+        s_xz_bwd = getattr(self, f'{bwd_dir}_s_in_proj')(s_x_b)
         s_x_b_1d, s_z_bwd = split(s_xz_bwd, 2, dim=1)
-        s_x_b_conv = causal_conv(s_x_b_1d, getattr(self, f'{bwd_dir}_v_conv1d'))
-        s_dt_b, s_B_b, s_C_b = split(getattr(self, f'{bwd_dir}_v_x_proj')(s_x_b_conv),
+        s_x_b_conv = causal_conv(s_x_b_1d, getattr(self, f'{bwd_dir}_s_conv1d'))
+        s_dt_b, s_B_b, s_C_b = split(getattr(self, f'{bwd_dir}_s_x_proj')(s_x_b_conv),
                                      [self.dt_rank, self.d_state, self.d_state], dim=-1)
-        s_dt_b = softplus(getattr(self, f'{bwd_dir}_v_dt_proj')(s_dt_b))
-        s_A_b = exp(-exp(getattr(self, f'{bwd_dir}_v_A')))
+        s_dt_b = softplus(getattr(self, f'{bwd_dir}_s_dt_proj')(s_dt_b))
+        s_A_b = exp(-exp(getattr(self, f'{bwd_dir}_s_A')))
         s_y_bwd = flip(selective_scan(s_x_b_conv, s_dt_b, exp(s_dt_b*s_A_b), s_dt_b*s_B_b, s_C_b,
-                                     getattr(self, f'{bwd_dir}_v_D'), s_z_bwd), dim=-1)
-        out_s = getattr(self, f'{fwd_dir}_v_out_proj')((s_y_fwd + s_y_bwd) / 2)
+                                     getattr(self, f'{bwd_dir}_s_D'), s_z_bwd), dim=-1)
+        out_s = getattr(self, f'{fwd_dir}_s_out_proj')((s_y_fwd + s_y_bwd) / 2)
 
         return out_r, out_s
 
@@ -255,7 +232,7 @@ class MMBiMamba4D:
 # ============================================================================
 
 class BiMamba1D:
-    """单向1D Mamba (用于时间维度, 因果)"""
+    """单向1D Mamba (用于时间维度)"""
     def __init__(self, d_model, d_state=16, d_conv=4, expand=2):
         self.d_inner = expand * d_model
         self.dt_rank = ceil(d_model / 16)
@@ -288,7 +265,7 @@ class BiMamba1D:
 
 
 class UniMamba:
-    """单向Mamba (时间维度, 因果)"""
+    """单向Mamba (时间维度)"""
     def __init__(self, d_model, d_state=16, d_conv=4, expand=2):
         self.inner = BiMamba1D(d_model, d_state, d_conv, expand)
     def forward(self, x):
@@ -296,7 +273,7 @@ class UniMamba:
 
 
 class MMUniMamba:
-    """双输入单向Mamba (时间维度多模态, 因果)"""
+    """双输入单向Mamba (时间维度多模态)"""
     def __init__(self, d_model, d_state=16, d_conv=4, expand=2):
         self.inner_r = BiMamba1D(d_model, d_state, d_conv, expand)
         self.inner_s = BiMamba1D(d_model, d_state, d_conv, expand)
@@ -305,7 +282,7 @@ class MMUniMamba:
 
 
 # ============================================================================
-# 单模态Mamba层
+# 单模态空间-时间分离Mamba层
 # ============================================================================
 
 class SpatialTemporalMambaLayer:
@@ -320,7 +297,7 @@ class SpatialTemporalMambaLayer:
         self.spatial_mamba = BiMamba4D(d_model, H, W)
         self.spatial_scale = 0.5
 
-        # 时间: 单向因果Mamba
+        # 时间: 单向Mamba
         self.temporal_mamba = UniMamba(d_model)
         self.temporal_scale = 0.5
 
@@ -370,7 +347,7 @@ class SpatialTemporalMambaLayer:
 
 
 # ============================================================================
-# 多模态Mamba层
+# 多模态空间-时间分离Mamba层
 # ============================================================================
 
 class MMSpatialTemporalMambaLayer:
@@ -389,10 +366,10 @@ class MMSpatialTemporalMambaLayer:
         self.temporal_mamba = MMUniMamba(d_model)
         self.temporal_scale = 0.5
 
-        self.norm_a_spatial = LayerNorm
-        self.norm_v_spatial = LayerNorm
-        self.norm_a_temporal = LayerNorm
-        self.norm_v_temporal = LayerNorm
+        self.norm_r_spatial = LayerNorm
+        self.norm_s_spatial = LayerNorm
+        self.norm_r_temporal = LayerNorm
+        self.norm_s_temporal = LayerNorm
 
     def forward(self, r_x, s_x):
         """
@@ -417,8 +394,8 @@ class MMSpatialTemporalMambaLayer:
 
             # 4方向双模态联合扫描
             r_out_frame, s_out_frame = self.spatial_mamba(
-                self.norm_a_spatial(r_frame),
-                self.norm_v_spatial(s_frame)
+                self.norm_r_spatial(r_frame),
+                self.norm_s_spatial(s_frame)
             )
 
             r_frame = permute(r_frame, [0, 3, 1, 2])
@@ -437,8 +414,8 @@ class MMSpatialTemporalMambaLayer:
         s_temporal = reshape(s_temporal, B*self.H*self.W, self.spatial_mamba.d_model, self.T)
 
         r_temporal_out, s_temporal_out = self.temporal_mamba(
-            self.norm_a_temporal(r_temporal),
-            self.norm_v_temporal(s_temporal)
+            self.norm_r_temporal(r_temporal),
+            self.norm_s_temporal(s_temporal)
         )
 
         r_temporal = r_temporal + self.temporal_scale * Dropout(r_temporal_out)
