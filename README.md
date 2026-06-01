@@ -1,6 +1,4 @@
-<h3 align="center">
-    DualCast: A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting
-</h3>
+# DualCast: A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting
 ![DualCast Framework Architecture](https://raw.githubusercontent.com/Li-jiaxinn/DualCast/main/dualcast.png)
 
 # 📕 Introduction:
