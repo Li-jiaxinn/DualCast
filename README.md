@@ -59,6 +59,6 @@ If you find this project useful for your research, please cite our paper:
 ```
 
 # 🙌🏻 Acknowledgement:
-We acknowledge the wonderful work of Mamba and Diffusion Models.
-The implementation of TDM is inspired by the Brownian Bridge diffusion process.
-The training pipeline is adapted from standard PyTorch practices.
+1. We acknowledge the wonderful work of Mamba and Diffusion Models.
+2. The implementation of TDM is inspired by the Brownian Bridge diffusion process.
+3. The training pipeline is adapted from standard PyTorch practices.
