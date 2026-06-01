@@ -41,6 +41,7 @@ We use the SEVIR-LR dataset for training and evaluation.
 
 4.Training and Testing
 We provide training and testing scripts in the scripts/ folder.
+
 Training
 ```shell
 python scripts/train.py --config configs/dualcast_default.yaml、
@@ -60,7 +61,8 @@ bibtex
   year={2026}
 }
 
-🙌🏻 Acknowledgement
+🙌🏻 Acknowledgement:
+
 We acknowledge the wonderful work of Mamba and Diffusion Models.
 The implementation of TDM is inspired by the Brownian Bridge diffusion process.
 The training pipeline is adapted from standard PyTorch practices.
