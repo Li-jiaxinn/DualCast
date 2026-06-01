@@ -47,6 +47,7 @@ python scripts/test.py --checkpoint path/to/your/best_model.pth
 ```
 # 📖 Citation:
 If you find this project useful for your research, please cite our paper:
+```shell
 bibtex
 @article{zheng2026two,
   title={A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting},
@@ -54,6 +55,7 @@ bibtex
   journal={IEEE Transactions on Geoscience and Remote Sensing}, 
   year={2026}
 }
+```
 
 # 🙌🏻 Acknowledgement:
 We acknowledge the wonderful work of Mamba and Diffusion Models.
