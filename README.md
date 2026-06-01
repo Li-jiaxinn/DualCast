@@ -2,8 +2,10 @@
 
 Official PyTorch code for training and inference pipeline for  
 **DualCast: A Two-Stage Multi-modal Learning Framework with Truncated Diffusion for Precipitation Nowcasting**
+[DualCast.pdf](https://github.com/user-attachments/files/28453600/DualCast.pdf)
 
 DualCast Pipeline
+
 
 📕 Introduction
 In this work, we propose **DualCast**, a two-stage multi-modal learning framework for precipitation nowcasting. DualCast addresses the challenges of cross-modal dependency, spatial displacement, and low efficiency through two core designs: 
