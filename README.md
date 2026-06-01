@@ -39,6 +39,7 @@ We use the SEVIR-LR dataset for training and evaluation. If you already have the
 cd DualCast
 ln -s path_to_SEVIR ./datasets/sevir  # link to your SEVIR dataset.
 python ./scripts/datasets/sevir/downsample_sevir.py
+```
 
 ## 4. Training and Testing
 We provide training and testing scripts in the ./scripts folder.
